@@ -18,25 +18,21 @@ def build_transforms():
 
 
 def get_optimizers_and_schedulers(gen, disc):
-    # Get optimizers and learning rate schedulers.
+    # optimizers and learning rate schedulers.
     optim_discriminator = torch.optim.Adam(disc.parameters(), lr=2e-4, betas=(0, 0.9))
     optim_generator = torch.optim.Adam(gen.parameters(), lr=2e-4, betas=(0, 0.9))
-    ##################################################################
-    # TODO 1.2: Construct the learning rate schedulers for the
-    # generator and discriminator. The learning rate for the
-    # discriminator should be decayed to 0 over 500K iterations.
-    # The learning rate for the generator should be decayed to 0 over
-    # 100K iterations.
-    ##################################################################
+    
+    # Construct the learning rate schedulers for the generator and discriminator. 
+    # The learning rate for the discriminator should be decayed to 0 over 500K iterations.
+    # The learning rate for the generator should be decayed to 0 over 100K iterations.
+    
     scheduler_discriminator = torch.optim.lr_scheduler.LambdaLR(
         optim_discriminator, 
         lr_lambda=lambda x: 1 - x / 500000)
     scheduler_generator =  torch.optim.lr_scheduler.LambdaLR(
         optim_generator, 
         lr_lambda=lambda x: 1 - x / 100000)
-    ##################################################################
-    #                          END OF YOUR CODE                      #
-    ##################################################################
+   
     return (
         optim_discriminator,
         scheduler_discriminator,
@@ -101,33 +97,23 @@ def train_model(
             with torch.cuda.amp.autocast(enabled=amp_enabled):
                 train_batch = train_batch.to(device)
                 
-                ####################### UPDATE DISCRIMINATOR #####################
-                ##################################################################
-                # TODO 1.2: compute generator, discriminator, and interpolated outputs
+               
+                # computing generator, discriminator, and interpolated outputs
                 # 1. Compute generator output
                 # Note: The number of samples must match the batch size.
                 # 2. Compute discriminator output on the train batch.
                 # 3. Compute the discriminator output on the generated data.
-                ##################################################################
-        
+       
                 fake_data = gen.forward(n_samples= train_batch.shape[0])
                 discrim_real = disc(train_batch)
                 discrim_fake = disc(fake_data)
-                ##################################################################
-                #                          END OF YOUR CODE                      #
-                ##################################################################
-
-                ##################################################################
-                # TODO 1.5 Compute the interpolated batch and run the
-                # discriminator on it.
-                ###################################################################
+               
+                # Computing the interpolated batch and runing the discriminator on it.
+              
                 alpha = torch.randn(train_batch.size(0), 1, 1, 1).to(train_batch.device)
                 interp = alpha * fake_data + (1 - alpha) * train_batch
                 discrim_interp = disc(interp)
-                ##################################################################
-                #                          END OF YOUR CODE                      #
-                ##################################################################
-
+               
             discriminator_loss = disc_loss_fn(
                 discrim_real, discrim_fake, discrim_interp, interp, lamb
             )
@@ -139,15 +125,12 @@ def train_model(
 
             if iters % 5 == 0:
                 with torch.cuda.amp.autocast(enabled=amp_enabled):
-                    ##################################################################
-                    # TODO 1.2: Compute generator and discriminator output on
-                    # generated data.
-                    ###################################################################
+                    
+                    # Compute generator and discriminator output on generated data.
+                   
                     fake_batch = gen.forward(n_samples= train_batch.shape[0])
                     discrim_fake = disc(fake_batch)
-                    ##################################################################
-                    #                          END OF YOUR CODE                      #
-                    ##################################################################
+                    
 
                     generator_loss = gen_loss_fn(discrim_fake)
 
@@ -159,18 +142,16 @@ def train_model(
             if iters % log_period == 0 and iters != 0:
                 with torch.no_grad():
                     with torch.cuda.amp.autocast(enabled=amp_enabled):
-                        ##################################################################
-                        # TODO 1.2: Generate samples using the generator.
+                        
+                        # Generate samples using the generator.
                         # Make sure they lie in the range [0, 1]!
-                        ##################################################################
+                        
                         # gs = gen.forward(n_samples= train_batch.size()[0])
                         # generated_samples = (gs+1)/2
                         generated_samples = (gen(train_batch.shape[0]) + 1 )/2
                         # generated_samples = gen(n_samples) 
                         # generated_samples = (generated_samples - sample_min) / (sample_max - sample_min) 
-                       ##################################################################
-                        #                          END OF YOUR CODE                      #
-                        ##################################################################
+                      
                     save_image(
                         generated_samples.data.float(),
                         prefix + "samples_{}.png".format(iters),
