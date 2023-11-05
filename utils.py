@@ -32,7 +32,7 @@ def get_fid(gen, dataset_name, dataset_resolution, z_dimension, batch_size, num_
 @torch.no_grad()
 def interpolate_latent_space(gen, path):
     ##################################################################
-    # TODO: 1.2: Generate and save out latent space interpolations.
+    # Generate and save out latent space interpolations.
     # 1. Generate 100 samples of 128-dim vectors. Do so by linearly
     # interpolating for 10 steps across each of the first two
     # dimensions between -1 and 1. Keep the rest of the z vector for
@@ -58,9 +58,7 @@ def interpolate_latent_space(gen, path):
         path,
         nrow=10,
     )
-    ##################################################################
-    #                          END OF YOUR CODE                      #
-    ##################################################################
+   
 
 def get_args():
     parser = argparse.ArgumentParser()
